@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "MacroTrack"
+description = "A mobile-friendly nutrition tracker for logging food, monitoring calories and macros, saving favorite meals, reviewing history, and customizing daily goals."
+version = "1.0.0"
+id = "artifacts/macrotrack"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21027
+
+[services.development]
+run = "pnpm --filter @workspace/macrotrack run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/macrotrack", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/macrotrack/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21027"
+BASE_PATH = "/"

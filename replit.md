@@ -1,6 +1,6 @@
-# [Project name]
+# MacroTrack
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+MacroTrack is a responsive, local-first nutrition tracker for logging food, monitoring daily calories and macros, saving favorite foods, reviewing history, and editing daily targets.
 
 ## Run & Operate
 
@@ -22,23 +22,33 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/macrotrack/src/App.tsx` — primary tracker UI, local state, validation, and localStorage persistence
+- `artifacts/macrotrack/src/index.css` — responsive visual system and component styles
+- `artifacts/macrotrack/.replit-artifact/artifact.toml` — web artifact routing and workflow configuration
+- `attached_assets/` — original self-contained MacroTrack HTML reference
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- MacroTrack is frontend-only for the first release; localStorage keeps logging fast and usable on a phone without requiring an account.
+- Stored data is normalized on load so malformed or older localStorage values do not break the app.
+- The UI is a single responsive route with modal surfaces for food entry, favorites, history, and daily targets.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Log, edit, and remove foods for today or a previously logged day.
+- Track calories, protein, carbohydrates, and fat against daily targets.
+- Save foods as favorites and add them back in one tap.
+- Browse logged days and return to today.
+- Persist data locally on the device.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- The app must be usable on a phone.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Local data is device-specific and is not synced between devices.
+- Production builds need `PORT` and `BASE_PATH` supplied by the managed artifact workflow.
 
 ## Pointers
 

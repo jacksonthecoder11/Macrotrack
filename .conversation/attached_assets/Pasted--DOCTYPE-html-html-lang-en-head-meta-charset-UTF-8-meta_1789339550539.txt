@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MacroTrack</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #0b0d12;
+      color: #ffffff;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .app {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px 16px 100px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    h1 span {
+      color: #7c5cff;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .settings {
+      background: #171b24;
+      color: white;
+      border: 1px solid #292f3b;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 18px;
+    }
+
+    .date {
+      color: #8f98a8;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .card {
+      background: #151923;
+      border: 1px solid #292f3b;
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .calorie-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+    }
+
+    .calories {
+      font-size: 40px;
+      font-weight: 800;
+    }
+
+    .goal-text {
+      color: #8f98a8;
+      font-size: 13px;
+    }
+
+    .progress {
+      height: 9px;
+      background: #292f3b;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 15px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #7c5cff;
+      transition: width 0.2s;
+    }
+
+    .macros {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .macro {
+      background: #1b202b;
+      padding: 13px;
+      border-radius: 14px;
+    }
+
+    .macro-number {
+      font-size: 19px;
+      font-weight: bold;
+    }
+
+    .macro-label {
+      color: #8f98a8;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 20px 3px 10px;
+    }
+
+    .food {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 0;
+      border-bottom: 1px solid #292f3b;
+    }
+
+    .food:last-child {
+      border-bottom: none;
+    }
+
+    .food-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .food-name {
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .food-macros {
+      color: #8f98a8;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .food-calories {
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    .food-button {
+      background: #1b202b;
+      color: white;
+      border: 1px solid #292f3b;
+      border-radius: 8px;
+      padding: 7px;
+      font-size: 11px;
+    }
+
+    .delete {
+      color: #ff6578;
+    }
+
+    .empty {
+      color: #8f98a8;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .secondary {
+      background: #1b202b;
+      color: white;
+      border: 1px solid #292f3b;
+      border-radius: 12px;
+      padding: 12px 5px;
+    }
+
+    .add-food {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(568px, calc(100% - 32px));
+      height: 55px;
+      border-radius: 17px;
+      background: #7c5cff;
+      color: white;
+      font-size: 16px;
+      z-index: 5;
+    }
+
+    /* MODAL */
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #11151e;
+      border-radius: 25px 25px 0 0;
+      padding: 20px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .modal-title {
+      font-size: 21px;
+      font-weight: bold;
+    }
+
+    .close {
+      background: #1b202b;
+      color: white;
+      border-radius: 10px;
+      padding: 9px 12px;
+    }
+
+    label {
+      display: block;
+      color: #8f98a8;
+      font-size: 12px;
+      font-weight: bold;
+      margin: 12px 0 6px;
+    }
+
+    input {
+      width: 100%;
+      background: #0b0d12;
+      color: white;
+      border: 1px solid #292f3b;
+      border-radius: 12px;
+      padding: 13px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #7c5cff;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .primary {
+      width: 100%;
+      background: #7c5cff;
+      color: white;
+      padding: 14px;
+      border-radius: 13px;
+      margin-top: 18px;
+      font-size: 15px;
+    }
+
+    .save-favorite {
+      width: 100%;
+      background: #1b202b;
+      color: white;
+      border: 1px solid #292f3b;
+      padding: 13px;
+      border-radius: 13px;
+      margin-top: 9px;
+    }
+
+    .saved-food,
+    .history-day {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 0;
+      border-bottom: 1px solid #292f3b;
+    }
+
+    .saved-info,
+    .history-info {
+      flex: 1;
+    }
+
+    .saved-name,
+    .history-name {
+      font-weight: bold;
+    }
+
+    .saved-details,
+    .history-details {
+      color: #8f98a8;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .use {
+      background: #7c5cff;
+      color: white;
+      padding: 8px 10px;
+      border-radius: 9px;
+    }
+
+    .note {
+      color: #8f98a8;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #242a36;
+      border: 1px solid #343b49;
+      padding: 11px 16px;
+      border-radius: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.2s;
+      z-index: 30;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header>
+    <h1>Macro<span>Track</span></h1>
+    <button class="settings" id="settingsButton">⚙️</button>
+  </header>
+
+  <div class="date" id="date"></div>
+
+  <!-- DASHBOARD -->
+
+  <div class="card">
+
+    <div class="calorie-top">
+      <div>
+        <div class="calories" id="calories">0</div>
+        <div class="goal-text" id="calorieGoalText">of 2500 calories</div>
+      </div>
+
+      <div class="goal-text" id="remaining">
+        2500 remaining
+      </div>
+    </div>
+
+    <div class="progress">
+      <div class="progress-fill" id="calorieProgress"></div>
+    </div>
+
+    <div class="macros">
+
+      <div class="macro">
+        <div class="macro-number" id="protein">0g</div>
+        <div class="macro-label">
+          Protein / <span id="proteinGoal">150</span>g
+        </div>
+      </div>
+
+      <div class="macro">
+        <div class="macro-number" id="carbs">0g</div>
+        <div class="macro-label">
+          Carbs / <span id="carbsGoal">300</span>g
+        </div>
+      </div>
+
+      <div class="macro">
+        <div class="macro-number" id="fat">0g</div>
+        <div class="macro-label">
+          Fat / <span id="fatGoal">80</span>g
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section-title">
+    Today's food
+  </div>
+
+  <div class="card" id="foodList">
+    <div class="empty">
+      Nothing logged yet.
+    </div>
+  </div>
+
+  <div class="buttons">
+
+    <button class="secondary" id="savedButton">
+      ⭐ Saved
+    </button>
+
+    <button class="secondary" id="historyButton">
+      📅 History
+    </button>
+
+    <button class="secondary" id="goalsButton">
+      🎯 Goals
+    </button>
+
+  </div>
+
+</div>
+
+<button class="add-food" id="addFoodButton">
+  ＋ Add food
+</button>
+
+
+<!-- ADD FOOD MODAL -->
+
+<div class="overlay" id="foodModal">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <div class="modal-title" id="foodModalTitle">
+        Add food
+      </div>
+
+      <button class="close" id="closeFood">
+        ✕
+      </button>
+    </div>
+
+    <input type="hidden" id="editId">
+
+    <label>Food name</label>
+    <input
+      id="foodName"
+      type="text"
+      placeholder="Chicken and rice"
+    >
+
+    <div class="input-grid">
+
+      <div>
+        <label>Calories</label>
+        <input
+          id="foodCalories"
+          type="number"
+          min="0"
+          placeholder="500"
+        >
+      </div>
+
+      <div>
+        <label>Protein (g)</label>
+        <input
+          id="foodProtein"
+          type="number"
+          min="0"
+          step="0.1"
+          placeholder="40"
+        >
+      </div>
+
+      <div>
+        <label>Carbs (g)</label>
+        <input
+          id="foodCarbs"
+          type="number"
+          min="0"
+          step="0.1"
+          placeholder="50"
+        >
+      </div>
+
+      <div>
+        <label>Fat (g)</label>
+        <input
+          id="foodFat"
+          type="number"
+          min="0"
+          step="0.1"
+          placeholder="15"
+        >
+      </div>
+
+    </div>
+
+    <button class="primary" id="saveFoodButton">
+      Add food
+    </button>
+
+    <button class="save-favorite" id="saveFavoriteButton">
+      ⭐ Add & save as favorite
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- SAVED FOODS MODAL -->
+
+<div class="overlay" id="savedModal">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <div class="modal-title">
+        Saved foods
+      </div>
+
+      <button class="close" id="closeSaved">
+        ✕
+      </button>
+    </div>
+
+    <div id="savedList"></div>
+
+    <button class="primary" id="createSavedButton">
+      ＋ Create saved food
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- HISTORY MODAL -->
+
+<div class="overlay" id="historyModal">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <div class="modal-title">
+        History
+      </div>
+
+      <button class="close" id="closeHistory">
+        ✕
+      </button>
+    </div>
+
+    <div id="historyList"></div>
+
+  </div>
+
+</div>
+
+
+<!-- GOALS MODAL -->
+
+<div class="overlay" id="goalsModal">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <div class="modal-title">
+        Daily goals
+      </div>
+
+      <button class="close" id="closeGoals">
+        ✕
+      </button>
+    </div>
+
+    <div class="input-grid">
+
+      <div>
+        <label>Calories</label>
+        <input id="goalCalories" type="number">
+      </div>
+
+      <div>
+        <label>Protein (g)</label>
+        <input id="goalProtein" type="number">
+      </div>
+
+      <div>
+        <label>Carbs (g)</label>
+        <input id="goalCarbs" type="number">
+      </div>
+
+      <div>
+        <label>Fat (g)</label>
+        <input id="goalFat" type="number">
+      </div>
+
+    </div>
+
+    <button class="primary" id="saveGoalsButton">
+      Save goals
+    </button>
+
+    <div class="note">
+      These goals are customizable. Use targets that make sense
+      for your training and fueling needs.
+    </div>
+
+  </div>
+
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+
+  /* =========================
+     DATA
+  ========================= */
+
+  const STORAGE_KEY = "macrotrack_data";
+
+  const defaultData = {
+    goals: {
+      calories: 2500,
+      protein: 150,
+      carbs: 300,
+      fat: 80
+    },
+
+    days: {},
+
+    savedFoods: []
+  };
+
+
+  let data = loadData();
+
+  const todayKey = getDateKey(new Date());
+
+  let currentDate = todayKey;
+
+
+  /* =========================
+     STORAGE
+  ========================= */
+
+  function loadData() {
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (!saved) {
+      return JSON.parse(JSON.stringify(defaultData));
+    }
+
+    try {
+
+      const parsed = JSON.parse(saved);
+
+      return {
+        goals: {
+          ...defaultData.goals,
+          ...(parsed.goals || {})
+        },
+
+        days: parsed.days || {},
+
+        savedFoods: parsed.savedFoods || []
+      };
+
+    } catch {
+
+      return JSON.parse(JSON.stringify(defaultData));
+
+    }
+  }
+
+
+  function saveData() {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(data)
+    );
+  }
+
+
+  /* =========================
+     DATE
+  ========================= */
+
+  function getDateKey(date) {
+
+    const year = date.getFullYear();
+
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+
+
+  function formatDate(key) {
+
+    const parts = key.split("-");
+
+    const date = new Date(
+      Number(parts[0]),
+      Number(parts[1]) - 1,
+      Number(parts[2])
+    );
+
+    return date.toLocaleDateString(
+      undefined,
+      {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+      }
+    );
+  }
+
+
+  /* =========================
+     DAY
+  ========================= */
+
+  function getCurrentDay() {
+
+    if (!data.days[currentDate]) {
+
+      data.days[currentDate] = {
+        foods: []
+      };
+
+    }
+
+    return data.days[currentDate];
+  }
+
+
+  /* =========================
+     TOTALS
+  ========================= */
+
+  function getTotals() {
+
+    const foods =
+      getCurrentDay().foods;
+
+    return foods.reduce(
+      (total, food) => {
+
+        total.calories += Number(food.calories) || 0;
+
+        total.protein += Number(food.protein) || 0;
+
+        total.carbs += Number(food.carbs) || 0;
+
+        total.fat += Number(food.fat) || 0;
+
+        return total;
+
+      },
+      {
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0
+      }
+    );
+  }
+
+
+  /* =========================
+     HELPERS
+  ========================= */
+
+  function formatNumber(number) {
+
+    if (
+      Number.isInteger(
+        Number(number)
+      )
+    ) {
+      return Number(number);
+    }
+
+    return Number(number)
+      .toFixed(1);
+  }
+
+
+  function escapeHTML(text) {
+
+    return String(text)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+
+  function showToast(message) {
+
+    const toast =
+      document.getElementById("toast");
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+
+      toast.classList.remove("show");
+
+    }, 1800);
+
+  }
+
+
+  /* =========================
+     RENDER DASHBOARD
+  ========================= */
+
+  function render() {
+
+    const totals = getTotals();
+
+    const goals = data.goals;
+
+    document.getElementById(
+      "date"
+    ).textContent =
+      formatDate(currentDate);
+
+
+    document.getElementById(
+      "calories"
+    ).textContent =
+      Math.round(totals.calories);
+
+
+    document.getElementById(
+      "calorieGoalText"
+    ).textContent =
+      `of ${Math.round(goals.calories)} calories`;
+
+
+    const remaining =
+      Math.max(
+        0,
+        goals.calories -
+        totals.calories
+      );
+
+
+    document.getElementById(
+      "remaining"
+    ).textContent =
+      `${Math.round(remaining)} remaining`;
+
+
+    const caloriePercent =
+      goals.calories > 0
+        ? Math.min(
+            100,
+            totals.calories /
+            goals.calories *
+            100
+          )
+        : 0;
+
+
+    document.getElementById(
+      "calorieProgress"
+    ).style.width =
+      caloriePercent + "%";
+
+
+    document.getElementById(
+      "protein"
+    ).textContent =
+      `${formatNumber(totals.protein)}g`;
+
+
+    document.getElementById(
+      "carbs"
+    ).textContent =
+      `${formatNumber(totals.carbs)}g`;
+
+
+    document.getElementById(
+      "fat"
+    ).textContent =
+      `${formatNumber(totals.fat)}g`;
+
+
+    document.getElementById(
+      "proteinGoal"
+    ).textContent =
+      formatNumber(goals.protein);
+
+
+    document.getElementById(
+      "carbsGoal"
+    ).textContent =
+      formatNumber(goals.carbs);
+
+
+    document.getElementById(
+      "fatGoal"
+    ).textContent =
+      formatNumber(goals.fat);
+
+
+    renderFoodList();
+
+  }
+
+
+  /* =========================
+     FOOD LIST
+  ========================= */
+
+  function renderFoodList() {
+
+    const container =
+      document.getElementById(
+        "foodList"
+      );
+
+    const foods =
+      getCurrentDay().foods;
+
+
+    if (foods.length === 0) {
+
+      container.innerHTML =
+        `<div class="empty">
+          Nothing logged yet.
+        </div>`;
+
+      return;
+    }
+
+
+    container.innerHTML =
+      foods.map(food => {
+
+        return `
+
+          <div class="food">
+
+            <div class="food-info">
+
+              <div class="food-name">
+                ${escapeHTML(food.name)}
+              </div>
+
+              <div class="food-macros">
+                ${formatNumber(food.protein)}g P
+                ·
+                ${formatNumber(food.carbs)}g C
+                ·
+                ${formatNumber(food.fat)}g F
+              </div>
+
+            </div>
+
+            <div class="food-calories">
+              ${Math.round(food.calories)} kcal
+            </div>
+
+            <button
+              class="food-button edit-button"
+              data-id="${food.id}">
+              Edit
+            </button>
+
+            <button
+              class="food-button delete edit-button"
+              data-delete-id="${food.id}">
+              ✕
+            </button>
+
+          </div>
+
+        `;
+
+      }).join("");
+
+  }
+
+
+  /* =========================
+     FOOD MODAL
+  ========================= */
+
+  function openFoodModal() {
+
+    document.getElementById(
+      "foodModal"
+    ).classList.add("active");
+
+  }
+
+
+  function closeFoodModal() {
+
+    document.getElementById(
+      "foodModal"
+    ).classList.remove("active");
+
+  }
+
+
+  function clearFoodForm() {
+
+    document.getElementById(
+      "editId"
+    ).value = "";
+
+    document.getElementById(
+      "foodName"
+    ).value = "";
+
+    document.getElementById(
+      "foodCalories"
+    ).value = "";
+
+    document.getElementById(
+      "foodProtein"
+    ).value = "";
+
+    document.getElementById(
+      "foodCarbs"
+    ).value = "";
+
+    document.getElementById(
+      "foodFat"
+    ).value = "";
+
+
+    document.getElementById(
+      "foodModalTitle"
+    ).textContent =
+      "Add food";
+
+
+    document.getElementById(
+      "saveFoodButton"
+    ).textContent =
+      "Add food";
+
+  }
+
+
+  function openAddFood() {
+
+    clearFoodForm();
+
+    openFoodModal();
+
+  }
+
+
+  function openEditFood(id) {
+
+    const food =
+      getCurrentDay()
+        .foods
+        .find(
+          food => food.id === id
+        );
+
+
+    if (!food) return;
+
+
+    document.getElementById(
+      "editId"
+    ).value = id;
+
+
+    document.getElementById(
+      "foodName"
+    ).value = food.name;
+
+
+    document.getElementById(
+      "foodCalories"
+    ).value = food.calories;
+
+
+    document.getElementById(
+      "foodProtein"
+    ).value = food.protein;
+
+
+    document.getElementById(
+      "foodCarbs"
+    ).value = food.carbs;
+
+
+    document.getElementById(
+      "foodFat"
+    ).value = food.fat;
+
+
+    document.getElementById(
+      "foodModalTitle"
+    ).textContent =
+      "Edit food";
+
+
+    document.getElementById(
+      "saveFoodButton"
+    ).textContent =
+      "Save changes";
+
+
+    openFoodModal();
+
+  }
+
+
+  function getFoodFromForm() {
+
+    const name =
+      document.getElementById(
+        "foodName"
+      ).value.trim();
+
+
+    if (!name) {
+
+      showToast(
+        "Enter a food name"
+      );
+
+      return null;
+
+    }
+
+
+    return {
+
+      name,
+
+      calories:
+        Number(
+          document.getElementById(
+            "foodCalories"
+          ).value
+        ) || 0,
+
+      protein:
+        Number(
+          document.getElementById(
+            "foodProtein"
+          ).value
+        ) || 0,
+
+      carbs:
+        Number(
+          document.getElementById(
+            "foodCarbs"
+          ).value
+        ) || 0,
+
+      fat:
+        Number(
+          document.getElementById(
+            "foodFat"
+          ).value
+        ) || 0
+
+    };
+
+  }
+
+
+  function saveFood(saveFavorite = false) {
+
+    const food =
+      getFoodFromForm();
+
+
+    if (!food) return;
+
+
+    const editId =
+      document.getElementById(
+        "editId"
+      ).value;
+
+
+    if (editId) {
+
+      const index =
+        getCurrentDay()
+          .foods
+          .findIndex(
+            food =>
+              food.id === editId
+          );
+
+
+      if (index !== -1) {
+
+        getCurrentDay()
+          .foods[index] = {
+            ...getCurrentDay()
+              .foods[index],
+            ...food
+          };
+
+      }
+
+
+      showToast(
+        "Food updated"
+      );
+
+    } else {
+
+      const newFood = {
+
+        id:
+          Date.now().toString(),
+
+        ...food
+
+      };
+
+
+      getCurrentDay()
+        .foods
+        .push(newFood);
+
+
+      if (saveFavorite) {
+
+        data.savedFoods.push({
+          id:
+            Date.now().toString() +
+            "-saved",
+
+          ...food
+
+        });
+
+      }
+
+
+      showToast(
+        saveFavorite
+          ? "Food added and saved"
+          : "Food added"
+      );
+
+    }
+
+
+    saveData();
+
+    render();
+
+    closeFoodModal();
+
+  }
+
+
+  /* =========================
+     SAVED FOODS
+  ========================= */
+
+  function openSavedModal() {
+
+    renderSavedFoods();
+
+    document.getElementById(
+      "savedModal"
+    ).classList.add("active");
+
+  }
+
+
+  function renderSavedFoods() {
+
+    const container =
+      document.getElementById(
+        "savedList"
+      );
+
+
+    if (
+      data.savedFoods.length === 0
+    ) {
+
+      container.innerHTML =
+        `<div class="empty">
+          No saved foods yet.
+        </div>`;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      data.savedFoods
+        .map(food => {
+
+          return `
+
+            <div class="saved-food">
+
+              <div class="saved-info">
+
+                <div class="saved-name">
+                  ${escapeHTML(food.name)}
+                </div>
+
+                <div class="saved-details">
+                  ${Math.round(food.calories)} kcal
+                  · ${formatNumber(food.protein)}g P
+                  · ${formatNumber(food.carbs)}g C
+                  · ${formatNumber(food.fat)}g F
+                </div>
+
+              </div>
+
+              <button
+                class="use"
+                data-use-id="${food.id}">
+                Add
+              </button>
+
+              <button
+                class="food-button delete"
+                data-saved-delete="${food.id}">
+                ✕
+              </button>
+
+            </div>
+
+          `;
+
+        })
+        .join("");
+
+  }
+
+
+  function addSavedFood(id) {
+
+    const food =
+      data.savedFoods
+        .find(
+          food =>
+            food.id === id
+        );
+
+
+    if (!food) return;
+
+
+    getCurrentDay()
+      .foods
+      .push({
+
+        id:
+          Date.now().toString(),
+
+        name: food.name,
+
+        calories: food.calories,
+
+        protein: food.protein,
+
+        carbs: food.carbs,
+
+        fat: food.fat
+
+      });
+
+
+    saveData();
+
+    render();
+
+    document.getElementById(
+      "savedModal"
+    ).classList.remove("active");
+
+
+    showToast(
+      "Saved food added"
+    );
+
+  }
+
+
+  /* =========================
+     HISTORY
+  ========================= */
+
+  function openHistoryModal() {
+
+    renderHistory();
+
+    document.getElementById(
+      "historyModal"
+    ).classList.add("active");
+
+  }
+
+
+  function renderHistory() {
+
+    const container =
+      document.getElementById(
+        "historyList"
+      );
+
+
+    const dates =
+      Object.keys(
+        data.days
+      )
+      .filter(
+        date =>
+          data.days[date]
+            .foods
+            .length > 0
+      )
+      .sort()
+      .reverse();
+
+
+    if (dates.length === 0) {
+
+      container.innerHTML =
+        `<div class="empty">
+          No history yet.
+        </div>`;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      dates.map(date => {
+
+        const foods =
+          data.days[date].foods;
+
+
+        const totals =
+          foods.reduce(
+            (total, food) => {
+
+              total.calories +=
+                Number(food.calories) || 0;
+
+              total.protein +=
+                Number(food.protein) || 0;
+
+              return total;
+
+            },
+            {
+              calories: 0,
+              protein: 0
+            }
+          );
+
+
+        return `
+
+          <div class="history-day">
+
+            <div class="history-info">
+
+              <div class="history-name">
+                ${formatDate(date)}
+              </div>
+
+              <div class="history-details">
+                ${Math.round(totals.calories)} kcal
+                · ${formatNumber(totals.protein)}g protein
+                · ${foods.length} foods
+              </div>
+
+            </div>
+
+            <button
+              class="use"
+              data-view-date="${date}">
+              View
+            </button>
+
+          </div>
+
+        `;
+
+      }).join("");
+
+  }
+
+
+  /* =========================
+     GOALS
+  ========================= */
+
+  function openGoalsModal() {
+
+    document.getElementById(
+      "goalCalories"
+    ).value =
+      data.goals.calories;
+
+
+    document.getElementById(
+      "goalProtein"
+    ).value =
+      data.goals.protein;
+
+
+    document.getElementById(
+      "goalCarbs"
+    ).value =
+      data.goals.carbs;
+
+
+    document.getElementById(
+      "goalFat"
+    ).value =
+      data.goals.fat;
+
+
+    document.getElementById(
+      "goalsModal"
+    ).classList.add("active");
+
+  }
+
+
+  function saveGoals() {
+
+    data.goals.calories =
+      Number(
+        document.getElementById(
+          "goalCalories"
+        ).value
+      ) || 0;
+
+
+    data.goals.protein =
+      Number(
+        document.getElementById(
+          "goalProtein"
+        ).value
+      ) || 0;
+
+
+    data.goals.carbs =
+      Number(
+        document.getElementById(
+          "goalCarbs"
+        ).value
+      ) || 0;
+
+
+    data.goals.fat =
+      Number(
+        document.getElementById(
+          "goalFat"
+        ).value
+      ) || 0;
+
+
+    saveData();
+
+    render();
+
+    document.getElementById(
+      "goalsModal"
+    ).classList.remove("active");
+
+
+    showToast(
+      "Goals saved"
+    );
+
+  }
+
+
+  /* =========================
+     BUTTONS
+  ========================= */
+
+  document
+    .getElementById("addFoodButton")
+    .addEventListener(
+      "click",
+      openAddFood
+    );
+
+
+  document
+    .getElementById("closeFood")
+    .addEventListener(
+      "click",
+      closeFoodModal
+    );
+
+
+  document
+    .getElementById("saveFoodButton")
+    .addEventListener(
+      "click",
+      () => saveFood(false)
+    );
+
+
+  document
+    .getElementById("saveFavoriteButton")
+    .addEventListener(
+      "click",
+      () => saveFood(true)
+    );
+
+
+  document
+    .getElementById("savedButton")
+    .addEventListener(
+      "click",
+      openSavedModal
+    );
+
+
+  document
+    .getElementById("historyButton")
+    .addEventListener(
+      "click",
+      openHistoryModal
+    );
+
+
+  document
+    .getElementById("goalsButton")
+    .addEventListener(
+      "click",
+      openGoalsModal
+    );
+
+
+  document
+    .getElementById("settingsButton")
+    .addEventListener(
+      "click",
+      openGoalsModal
+    );
+
+
+  document
+    .getElementById("closeSaved")
+    .addEventListener(
+      "click",
+      () => {
+        document
+          .getElementById("savedModal")
+          .classList.remove("active");
+      }
+    );
+
+
+  document
+    .getElementById("closeHistory")
+    .addEventListener(
+      "click",
+      () => {
+        document
+          .getElementById("historyModal")
+          .classList.remove("active");
+      }
+    );
+
+
+  document
+    .getElementById("closeGoals")
+    .addEventListener(
+      "click",
+      () => {
+        document
+          .getElementById("goalsModal")
+          .classList.remove("active");
+      }
+    );
+
+
+  document
+    .getElementById("saveGoalsButton")
+    .addEventListener(
+      "click",
+      saveGoals
+    );
+
+
+  document
+    .getElementById("createSavedButton")
+    .addEventListener(
+      "click",
+      () => {
+
+        document
+          .getElementById("savedModal")
+          .classList.remove("active");
+
+        openAddFood();
+
+      }
+    );
+
+
+  /* =========================
+     EVENT DELEGATION
+  ========================= */
+
+  document.addEventListener(
+    "click",
+    function(event) {
+
+      const editButton =
+        event.target.closest(
+          "[data-id]"
+        );
+
+
+      if (
+        editButton &&
+        editButton.classList
+          .contains("edit-button")
+      ) {
+
+        openEditFood(
+          editButton.dataset.id
+        );
+
+        return;
+
+      }
+
+
+      const deleteButton =
+        event.target.closest(
+          "[data-delete-id]"
+        );
+
+
+      if (deleteButton) {
+
+        const id =
+          deleteButton.dataset
+            .deleteId;
+
+
+        getCurrentDay().foods =
+          getCurrentDay()
+            .foods
+            .filter(
+              food =>
+                food.id !== id
+            );
+
+
+        saveData();
+
+        render();
+
+        showToast(
+          "Food deleted"
+        );
+
+        return;
+
+      }
+
+
+      const useButton =
+        event.target.closest(
+          "[data-use-id]"
+        );
+
+
+      if (useButton) {
+
+        addSavedFood(
+          useButton.dataset.useId
+        );
+
+        return;
+
+      }
+
+
+      const savedDelete =
+        event.target.closest(
+          "[data-saved-delete]"
+        );
+
+
+      if (savedDelete) {
+
+        const id =
+          savedDelete.dataset
+            .savedDelete;
+
+
+        data.savedFoods =
+          data.savedFoods
+            .filter(
+              food =>
+                food.id !== id
+            );
+
+
+        saveData();
+
+        renderSavedFoods();
+
+        showToast(
+          "Saved food deleted"
+        );
+
+        return;
+
+      }
+
+
+      const viewButton =
+        event.target.closest(
+          "[data-view-date]"
+        );
+
+
+      if (viewButton) {
+
+        currentDate =
+          viewButton.dataset
+            .viewDate;
+
+
+        document
+          .getElementById(
+            "historyModal"
+          )
+          .classList.remove(
+            "active"
+          );
+
+
+        render();
+
+      }
+
+    }
+  );
+
+
+  /* =========================
+     CLOSE MODALS BY BACKGROUND
+  ========================= */
+
+  document
+    .querySelectorAll(".overlay")
+    .forEach(
+      overlay => {
+
+        overlay.addEventListener(
+          "click",
+          event => {
+
+            if (
+              event.target ===
+              overlay
+            ) {
+
+              overlay.classList
+                .remove("active");
+
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+  /* =========================
+     START APP
+  ========================= */
+
+  render();
+
+</script>
+
+</body>
+</html>
