@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PORT: 5173
-      BASE_PATH: /Microtrack/
+      BASE_PATH: /Macrotrack/
 
     environment:
       name: github-pages
@@ -46,6 +46,9 @@ jobs:
 
       - name: Build MacroTrack
         run: pnpm --filter @workspace/macrotrack build
+
+      - name: Check built index
+        run: cat artifacts/macrotrack/dist/public/index.html
 
       - name: Set up GitHub Pages
         uses: actions/configure-pages@v5
