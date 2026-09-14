@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PORT: 5173
+      BASE_PATH: /Microtrack/
 
     environment:
       name: github-pages
